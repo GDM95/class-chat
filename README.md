@@ -16,7 +16,7 @@ Find an open chatroom or join an open one. Subject and course data is populated 
 ![](AddChat.gif)
 
 Edit your display name within chatrooms, and change your user avatar by picking an image from the device's camera roll. User settings are updated in Firestore and avatars in Firebase Storage upon clicking 'Done'.<br /><br />
-![](Settings.gif)
+![](EditSettings.gif)
 
 After joining a chatroom, users can send messages eachother. The messaging UI is provided by the Gifted Chat library, and past messages are stored in Firestore.<br />
 
