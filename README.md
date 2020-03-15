@@ -22,8 +22,7 @@ Edit your display name within chatrooms, and change your user avatar by picking 
 
 After joining a chatroom, users can send messages eachother. The messaging UI is provided by the Gifted Chat library, and past messages are stored in Firestore.<br />
 
-Image support is planned for future release, as well as past message updates ( such as when the user changes their name/avatar ).
-<br /><br />
+Image support is planned for future release, as well as past message updates ( such as when the user changes their name/avatar ).<br />
 ![](SendMessages.gif)
 
 Sign out of your account to return to the login screen.<br />
