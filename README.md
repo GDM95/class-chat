@@ -26,7 +26,7 @@ Image support is planned for future release, as well as past message updates ( s
 <br /><br />
 ![](SendMessages.gif)
 
-<br /><br />
+<br />
 Sign out of your account to return to the login screen.<br />
 ![](SignOut.gif)
 <br />
