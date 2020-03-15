@@ -6,7 +6,6 @@ src/config/
 config/
 
 # Xcode
-GoogleService-Info.plist
 #
 build/
 *.pbxuser
