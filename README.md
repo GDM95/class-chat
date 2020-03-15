@@ -9,7 +9,7 @@ This application uses Google Firestore as well as Firebase for storage, and Redu
 ## Authentication
 Sign up or log in to your existing account. User information is authenticated using Email Link via Google Firebase Authentication. <br />
 ![](SignUp.gif)
-
+<br /><br />
 
 
 ## Firestore Integration
@@ -20,12 +20,13 @@ Find an open chatroom or join an open one. Subject and course data is populated 
 Edit your display name within chatrooms, and change your user avatar by picking an image from the device's camera roll. User settings are updated in Firestore and avatars in Firebase Storage upon clicking 'Done'.<br /><br />
 ![](EditSettings.gif)
 
-After joining a chatroom, users can send messages eachother. The messaging UI is provided by the Gifted Chat library, and past messages are stored in Firestore.<br /><br />
-![](SendMessages.gif)
-<br />
-Image support is planned for future release, as well as past message updates ( such as when the user changes their name/avatar ).
-<br />
+After joining a chatroom, users can send messages eachother. The messaging UI is provided by the Gifted Chat library, and past messages are stored in Firestore.<br />
 
+Image support is planned for future release, as well as past message updates ( such as when the user changes their name/avatar ).
+<br /><br />
+![](SendMessages.gif)
+
+<br /><br />
 Sign out of your account to return to the login screen.<br />
 ![](SignOut.gif)
 <br />
