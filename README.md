@@ -1,9 +1,6 @@
 A multi-user React Native application allowing students to join chatrooms dedicated to courses in the current university semester. Course data was obtained from the Rutgers University online course catalog through Selenium webdriver.
 
-This application uses Google Firestore as well as Firebase for storage, and Redux for state management.
-
-
-Message and Chat data are synced with the React Native components through [React-Redux-Firebase](https://github.com/prescottprue/react-redux-firebase) bindings.<br />
+This application uses Google Firestore as well as Firebase for storage, and Redux for state management. Message and Chat data are synced with the React Native components through [React-Redux-Firebase](https://github.com/prescottprue/react-redux-firebase) bindings.<br />
 
 ## Authentication
 Sign up or log in to your existing account. User information is authenticated using Email Link via Google Firebase Authentication. <br />
