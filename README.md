@@ -1,10 +1,36 @@
 A multi-user React Native application allowing students to join chatrooms dedicated to courses in the current university semester. Course data was obtained from the Rutgers University online course catalog through Selenium webdriver.
 
-Authentication and data storage is handled with Firebase/Firestore and application state is managed with Redux. React-redux-firebase bindings are used to sync app state with firebase state.
 
+React-redux-firebase bindings are used to sync app state with firebase state.
+
+
+This application uses Google Firestore as well as Firebase for storage, and Redux for state management.
+
+## Authentication
+Sign up or log in to your existing account. User information is authenticated using Email Link via Google Firebase Authentication.
 ![](SignUp.gif)
+
+
+
+## Firestore Integration
+
+Find an open chatroom or join an open one. Subject and course data is populated from the Rutgers University course catalog and stored in Google's Cloud Firestore. 
+
 ![](AddChat.gif)
+
+Edit your display name within chatrooms, and change your user avatar by picking an image from the device's camera roll.
+
 ![](EditSettings.gif)
+
+After joining a chatroom, users can send messages eachother. The messaging UI is provided by the Gifted Chat library, and past messages are 
+
 ![](SendMessages.gif)
+
+Image support is planned for future release, as well as past message updates ( such as when the user changes their name/avatar ). 
+
+
+Sign out of your account to return to the login screen.
 ![](SignOut.gif)
+
+
 
