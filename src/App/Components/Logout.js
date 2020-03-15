@@ -4,6 +4,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons'
 import { connect } from 'react-redux'
 import { logout } from '../Redux/actions/authActions'
+import { actionTypes } from 'redux-firestore'
 
 
 
@@ -17,8 +18,8 @@ class Logout extends React.Component {
           [
             {text: 'Cancel', onPress: () => console.log('Sign out cancelled')},
             {text: 'Sign Out', onPress: () => {
+                this.props.clearData()
                 this.props.logout()
-                //this.props.navigation.navigate('Login')
             }
             },
           ],
@@ -37,6 +38,23 @@ class Logout extends React.Component {
         )
     }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    authError: state.auth.authError
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    logout: (creds) => dispatch(logout(creds)),
+    clearData: () => dispatch({ type: actionTypes.CLEAR_DATA })
+
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Logout)
+
 
 const styles = StyleSheet.create({
     signOutContainer: {
@@ -64,18 +82,3 @@ const styles = StyleSheet.create({
     }
   })
   
-  
-
-const mapStateToProps = (state) => {
-    return {
-      authError: state.auth.authError
-    }
-  }
-  
-  const mapDispatchToProps = (dispatch) => {
-    return {
-      logout: (creds) => dispatch(logout(creds))
-    }
-  }
-  
-  export default connect(mapStateToProps, mapDispatchToProps)(Logout)

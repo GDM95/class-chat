@@ -1,4 +1,3 @@
-//import firebase from '../../../config/fbConfig'
 
 export const signIn = (credentials) => {
     return (dispatch, getState, { getFirebase }) => {
@@ -52,5 +51,13 @@ export const logout = () => {
         })
     }
 }
+
+export const resetAuthError = () => {
+    return (dispatch) => {
+        dispatch({ type: 'RESET_AUTH_ERROR'})
+    }
+}
+
+
 
 

@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navigator from './src/App/Navigation/AppNavigator'
 import { Provider, useSelector } from 'react-redux';
 import { createStore, applyMiddleware, compose } from 'redux';
 import rootReducer from './src/App/Redux/reducers/rootReducer';
-//import firebase from 'react-native-firebase';
 import thunk from 'redux-thunk'
 import { createFirestoreInstance, getFirestore, reduxFirestore } from 'redux-firestore'
 import { ReactReduxFirebaseProvider, getFirebase, isLoaded } from 'react-redux-firebase'
 import fbConfig from './src/config/fbConfig'
 import firebase from './src/config/fbConfig'
 
+import SplashScreen from 'react-native-splash-screen'
 
 
 const store = createStore(rootReducer, 
@@ -32,16 +32,13 @@ const rrfProps = {
   createFirestoreInstance,
 }
 
-/*
-AuthIsLoaded = ({ children }) => {
-  const auth = useSelector(state => state.firebase.auth)
-  if (!isLoaded(auth)) return <Text>Loading Screen...</Text>;
-      return children
-}
-*/
-
 
 export default class App extends React.Component { 
+
+  componentDidMount() {
+    SplashScreen.hide()
+  }
+
   render() {
     return (
       <Provider store={ store }>
@@ -52,9 +49,3 @@ export default class App extends React.Component {
     );
   }
 }
-
-/*
-<AuthIsLoaded>
-            <Navigator />
-          </AuthIsLoaded>
-*/

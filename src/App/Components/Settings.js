@@ -2,18 +2,13 @@ import React from 'react'
 import { StyleSheet, Platform, Image, Text, View, ImageBackground, TextInput } from 'react-native'
 import Logout from './Logout'
 import BackHeader from './BackHeader'
+import Avatar from './Avatar'
 import Icon from 'react-native-vector-icons/Ionicons'
-import ImagePicker from 'react-native-image-picker';
 
-import firebase from 'react-native-firebase'
-import firestore from '@react-native-firebase/firestore';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-
-import { firestoreConnect } from 'react-redux-firebase'
 import { connect } from 'react-redux'
 import { compose } from 'redux'
-
-
+import { updateName, updateEmail } from '../Redux/actions/userActions'
+import * as constants from '../../constants';
 
 
 class Settings extends React.Component {
@@ -24,80 +19,39 @@ class Settings extends React.Component {
   }
 
   componentDidMount() {
+    this.readUserData()
+  }
 
-    let user = firebase.auth().currentUser._user
-
-    
-    firestore().collection("users").doc(user.uid).get().then(doc => {
-    data = doc.data()
+  // set the component state from the Redux store
+  readUserData = () => {
+    const { name, email } = this.props.user
     this.setState({currentUser: {
-        name: data.name,
-        email: data.email,
-        avatar: data.avatar,
-        id: doc.id,
+      name: name,
+      email: email,
     }})
-    })
-
-  
   }
-
-  selectImage = () => {
-    console.log("Avatar: ", this.state.currentUser.avatar)
-
-    ImagePicker.showImagePicker({title: 'Pick an Image', maxWidth: 800, maxHeight: 600},
-    response => {
-        if(response.error){
-            console.log('image error')
-        }else{
-            const source = { uri: response.uri }
-            this.setState(prevState => ({
-              ...prevState,
-              currentUser: {
-                  ...prevState.currentUser, avatar: source.uri}
-            }))
-            let user = firebase.auth().currentUser._user
-            
-
-            firebase.storage().ref('avatars/' + user.uid).put(source.uri);
-            firebase.storage().ref('avatars/' + user.uid).getDownloadURL().then(url => {
-                console.log('Download URL: ', url)
-                firestore().collection("users").doc(user.uid).update({
-                  avatar: url,
-                })
-            })
-            
-        }
-    })
-
-  }
-
-  saveInfo = () => {
-    console.log('user info updated', this.state.currentUser.email)
-    let user = firebase.auth().currentUser._user
-    firestore().collection("users").doc(user.uid).update({
-        name: this.state.currentUser.name,
-        email: this.state.currentUser.email
-    })
-  }
-
 
   onChangeTextInput = (str, field) => {
     this.setState(prevState => ({
       ...prevState,
       currentUser: {
-          ...prevState.currentUser, [field]: str}
+          ...prevState.currentUser, [field]: str
+      }
     }))
   }
 
-
-  goBack = () => {
+  updateInfo = () => {
+    const { name, email } = this.state.currentUser
+    this.props.updateName(name)
+    //this.props.updateEmail(email)
     this.props.navigation.navigate('Home')
   }
 
-  setAvatar = () => {
-    this.selectImage()
+  goBack = () => {
+    // reset the component state to Redux state
+    this.readUserData()
+    this.props.navigation.navigate('Home')
   }
-
 
   render() {
     const { currentUser } = this.state;
@@ -106,50 +60,24 @@ class Settings extends React.Component {
     }
 
     return (
-    <>
-      <BackHeader title={'Settings'} command={this.goBack} titleSize={22}/>
-
+      <>
+      <BackHeader title={'Settings'} leftAction={this.goBack} rightText={'Done'} rightAction={this.updateInfo} titleSize={22}/>
       <View style={styles.headerContainer}>
-          <ImageBackground
-          style={styles.headerBackgroundImage}
+          <View
+          style={styles.headerBackground}
           blurRadius={10}
-          source={{
-              uri: this.state.currentUser.avatar,
-          }}
-          >
-          <View style={styles.headerColumn}>
-            <TouchableOpacity onPressOut={this.setAvatar}>
-              <Image
-              style={styles.userImage}
-              source={{
-                  uri: this.state.currentUser.avatar,
-              }}
-              />
-              </TouchableOpacity>
-              <Text style={styles.userNameText}>{this.state.currentUser.name}</Text>
-              <View style={styles.userAddressRow}>
-              <View>
-                  <Icon
-                  name="md-arrow-round-back"
-                  underlayColor="transparent"
-                  iconStyle={styles.placeIcon}
-                  onPress={this.onPressPlace}
-                  />
-              </View>
-              <View style={styles.userCityRow}>
-                  <Text style={styles.userCityText}>
-                  City Test
-                  </Text>
-              </View>
-              </View>
+          backgroundColor={'#000a28'} >
+            <View style={styles.headerColumn}>
+                <Avatar active={true} showName={false} height={215}/>
+            </View>
           </View>
-          </ImageBackground>
       </View>
       <View style={styles.editInfoTop}>
-        <Text style={styles.inputLabel}>Name</Text>
+        <Text style={styles.inputLabel}>Display Name</Text>
         <TextInput
-            style={styles.input}
-            onEndEditing={this.saveInfo}
+            style={[styles.input, {fontFamily: constants.PRIMARY_FONT}]}
+            maxLength={25}
+            placeholder={this.props.user.name}
             defaultValue={this.state.currentUser.name}
             onChangeText={(str) => this.onChangeTextInput(str, 'name')}            
             underlineColorAndroid="transparent"
@@ -158,21 +86,45 @@ class Settings extends React.Component {
       <View style={styles.editInfoMid}>
         <Text style={styles.inputLabel}>Email</Text>
         <TextInput
-            style={styles.input}
+            editable={false}
+            style={[styles.input, {fontFamily: constants.PRIMARY_FONT}]}
+            placeholder={this.props.user.email}
             defaultValue={this.state.currentUser.email}
-            onEndEditing={this.saveInfo}
             onChangeText={(str) => this.onChangeTextInput(str, 'email')}            
             underlineColorAndroid="transparent"
         />
       </View>
       <Logout navigation={this.props.navigation}/>
       </>
-    );
+    )
   }
   onValueChange(value){
     this.setState({switchValue: value});
     }
 }
+
+const mapStateToProps = (state) => {
+  console.log('Settings State: ', state)
+  return {
+    user: state.firebase.profile
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    updateName: (name) => dispatch(updateName(name)),
+    //updateEmail: (email) => dispatch(updateEmail(email)),
+  }
+}
+
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps), 
+  /*firestoreConnect((props) => {
+      return [{ collection: 'users', doc: props.user.uid }]
+  })*/
+)(Settings)
+
+
 
 const styles = StyleSheet.create({
   editInfoTop: {
@@ -208,24 +160,9 @@ const styles = StyleSheet.create({
       fontSize: 16,
       textAlign: 'right'
   },
-  cardContainer: {
-    backgroundColor: '#FFF',
-    borderWidth: 0,
-    flex: 1,
-    margin: 0,
-    padding: 0,
-  },
-  container: {
-    flex: 1,
-  },
-  emailContainer: {
-    backgroundColor: '#FFF',
-    flex: 1,
-    paddingTop: 30,
-  },
-  headerBackgroundImage: {
-    paddingBottom: 20,
-    paddingTop: 35,
+  headerBackground: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   headerContainer: {},
   headerColumn: {
@@ -241,31 +178,6 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  placeIcon: {
-    color: 'white',
-    fontSize: 26,
-  },
-  scroll: {
-    backgroundColor: '#FFF',
-  },
-  telContainer: {
-    backgroundColor: '#FFF',
-    flex: 1,
-    paddingTop: 30,
-  },
-  userAddressRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  userCityRow: {
-    backgroundColor: 'transparent',
-  },
-  userCityText: {
-    color: '#A5A5A5',
-    fontSize: 15,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
   userImage: {
     borderColor: '#F7F2F1',
     borderRadius: 100,
@@ -274,30 +186,4 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     width: 190,
   },
-  userNameText: {
-    color: '#FFF',
-    fontSize: 22,
-    fontWeight: 'bold',
-    paddingBottom: 8,
-    textAlign: 'center',
-  }, 
-  signOutStyle: {
-    //color: 'red',
-    fontSize: 16,
-}
 })
-
-
-const mapStateToProps = (state) => {
-  console.log(state)
-  return {
-    user: state.user
-  }
-}
-
-export default compose(
-  connect(mapStateToProps), 
-  firestoreConnect([
-      { collection: 'users' }
-    ])
-)(Settings)

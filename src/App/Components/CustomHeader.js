@@ -1,7 +1,9 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons'
-import {Header} from 'react-native-elements'
+import { Header } from 'react-native-elements'
+import * as constants from '../../constants';
+
 
 import DrawerTrigger from './DrawerTrigger'
 
@@ -15,16 +17,19 @@ export default class CustomHeader extends React.Component {
         centerComponent={{ text: this.props.title, style: { color: '#fff', fontSize: 22 } }}
         rightComponent={this.props.commandEnabled 
             ? <TouchableOpacity style={styles.trigger} onPress={this.props.command} >
-                <Icon name={'md-add'} size={33} color={'black'} />
+                <Icon name={'md-add'} size={35} color={'black'} />
             </TouchableOpacity>
             : null }
+        containerStyle={{
+            backgroundColor: constants.PRIMARY_COLOR,
+            borderBottomWidth: 0,
+        }}
         />
     )
   }
 }
 
 
-//<Text style={styles.utility}>G</Text>
 const styles = StyleSheet.create({
     container:{
         //flex: 1,
@@ -51,7 +56,6 @@ const styles = StyleSheet.create({
     },
     utility: {
         alignSelf: 'flex-end',
-
         fontSize: 27
     }
 });

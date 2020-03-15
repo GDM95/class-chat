@@ -1,108 +1,146 @@
 import React from 'react';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 
 import BackHeader from './BackHeader';
-import firebaseSDK from '../../../config/firebaseSDK';
-import firebase from 'react-native-firebase'
-import firestore from '@react-native-firebase/firestore';
+import {
+  ActivityIndicator,
+  View,
+  StyleSheet,
+} from 'react-native'
+
+import { firestoreConnect } from 'react-redux-firebase'
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import { addMessage } from '../Redux/actions/chatActions'
 
 
 
-export default class Chat extends React.Component {
-
-    state = {
-      messages: [],
-      currentUser: null,
-      chatID: '',
-      courseTitle: ''
-    };
+class Chat extends React.Component {
 
     componentDidMount(){
-        
-        let user = firebase.auth().currentUser._user
-        firestore().collection("users").doc(user.uid).get().then(doc => {
-            data = doc.data()
-            this.setState({currentUser: {
-                name: data.name,
-                email: data.email,
-                avatar: data.avatar,
-                _id: doc.id,
-            }})
-        })
-
-        let chatID = this.props.navigation.state.params.id
-        this.setState({chatID: chatID})
-
-        firestore().collection("chats").doc(chatID).onSnapshot((doc) => {
-            this.setState({ messages: [], courseTitle: doc.data().courseTitle })
-            let newArray = []
-            doc.data().messages.map(item => {
-                firestore().collection("messages").doc(item).onSnapshot((doc) => {
-                    let message = doc.data()
-                    message['_id'] = doc.id
-                    newArray.push(message)
-                    this.setState(previousState => ({
-                        messages: GiftedChat.append(previousState.messages, message)
-                    }))
-                })
-            })
-        })
+        console.log('Chat component mounted')
     }
     
-
-   get user() {
-        currentUser = this.state.currentUser
+   get user(){
+        const { name, avatar, uid } = this.props.user
         return {
-            name: currentUser.name,
-            email: currentUser.email,
-            avatar: currentUser.avatar.uri,
-            _id: currentUser._id
+            name: name,
+            avatar: avatar,
+            _id: uid
         };
     }
 
-
-    get timestamp() {
-        return firebase.database.ServerValue.TIMESTAMP;
-    }
-
-    onSend(messages = []) {
-        for (let i = 0; i < messages.length; i++) {
-            const { text, user } = messages[i];
-            const message = {
-                text,
-                user,
-                timestamp: this.timestamp,
-            };
-
-           firestore().collection("messages").add(message).then((doc) => {
-                const id = doc.id
-                firestore().collection("chats").doc(this.state.chatID).update({
-                    messages: firestore.FieldValue.arrayUnion(id)
-                })
-           })
-        }
-    }
-
     goBack = () => {
+        console.log('back to main clicked')
         this.props.navigation.goBack()
     }
 
+
     render() {
       return (
+        <View style={{ flex: 1 }}>
         <>
-        {this.state.currentUser ?
-            <>
-            <BackHeader title={this.state.courseTitle} command={this.goBack} titleSize={12} />
+            {console.log("Chat props: ", this.props.chat.messages)}
+            <><BackHeader 
+              title={this.props.chat.courseTitle} 
+              leftAction={this.goBack} 
+              centerAction={() => this.props.navigation.navigate('ChatInfo', this.props.chat)} 
+              isClickable={true}
+              titleSize={12} />
             <GiftedChat
-            showUserAvatar={true}
-            renderUsernameOnMessage={true}
-            messages={this.state.messages}
-            onSend={messages => this.onSend(messages)}
-            user={this.user}
-            />
+                //showUserAvatar={true}
+                alwaysShowSend={true}
+                renderUsernameOnMessage={true}
+                isTyping={true}
+                messages={this.props.chat.messages}
+                renderTime={() => {}}
+                onSend={message => this.props.addMessage(message[0], this.props.chat.id)}
+                maxInputLength={500}
+                minInputToolbarHeight={50}
+                user={this.user}
+                renderUsername={() => console.log("renderUsername => ", item) }
+                renderLoading={() => 
+                  <View style={[styles.spinnerContainer]}>
+                    <ActivityIndicator size="large" color="gray" />
+                  </View>} //- Render a loading view when initializing
+                isLoadingEarlier={true}
+                //renderLoadEarlier={} //(Function) - Custom "Load earlier messages" button
+                renderBubble={props => {
+                  return (
+                    <Bubble
+                      {...props}
+                      textStyle={{
+                        left: {
+                          color: 'black',
+                        },
+                      }}
+                      wrapperStyle={{
+                        left: {
+                          backgroundColor: '#ededed',
+                        },
+                      }}
+                    />
+                  );
+                }}
+            />{
+           }
             </>
-        : null }
         </>
+        </View>
       );
     }
   }
+
+  
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      addMessage: (message, chatId) => dispatch(addMessage(message, chatId)),
+    }
+  }
+  
+  const mapStateToProps = (state, ownProps) => { 
+    console.log("Chat mapStateToProps -> state: ", state, ownProps)
+
+    let singleChat = state.firestore.data.chats[ownProps.navigation.state.params.id]
+    if(singleChat && singleChat.messages){
+      console.log("Singlechat: ", singleChat, singleChat.messages)
+      let temp = {...singleChat, 
+        messages: singleChat.messages.map((m) => {
+          let message = state.firestore.data.allMessages[m]
+          return {
+            ...message,
+            createdAt: message.timestamp.toDate()
+          }
+        }).reverse()
+      }
+      return {
+        user: state.firestore.data.user,
+        chat: temp,
+      }
+    }else{
+      return {
+        user: state.firestore.data.user,
+        chat: { messages: null },
+      }
+    }
+}
+  
+  export default compose(
+    firestoreConnect((props) => {
+      console.log("Chat firestoreConnect -> props : ", props)
+      console.log("course id prop: ", props.navigation.state.params.id)
+      return [ { collection: 'chats' }, { collection: 'messages' },
+                { collection: 'users' } ] 
+    }),
+    connect(mapStateToProps, mapDispatchToProps),
+  )(Chat)
+
+
+  const styles = StyleSheet.create({
+    spinnerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+  })
+  
